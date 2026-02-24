@@ -1,7 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { AppDataSource } from "../config/data-source";
 import { Room } from "../entities/Room";
-import { FileMeta } from "../entities/FileMeta";
 
 /* =============================
    Types
@@ -53,10 +52,26 @@ const rooms: Record<string, User[]> = {};
    Setup Socket
 ============================= */
 
+
+let io: Server;
+
+export const initSocket = (server: any): Server => {
+    io = new Server(server, {
+        cors: { origin: "*" },
+    });
+
+    return io;
+};
+
+export const getIO = (): Server => {
+    if (!io) {
+        throw new Error("Socket.io not initialized");
+    }
+    return io;
+};
+
 export const setupSocket = (io: Server) => {
     io.on("connection", (socket: Socket) => {
-        console.log("Connected:", socket.id);
-
         /* ===== Join Room ===== */
 
         socket.on("join-room", async ({ roomId, userName }: JoinRoomPayload) => {
@@ -94,35 +109,6 @@ export const setupSocket = (io: Server) => {
             }
 
             console.log(`Room ${roomId} users:`, rooms[roomId].length);
-        });
-
-        /* ===== File Metadata ===== */
-
-        socket.on("file-meta", async ({ roomId, meta }: FileMetaPayload) => {
-            const roomRepo = AppDataSource.getRepository(Room);
-            const fileRepo = AppDataSource.getRepository(FileMeta);
-
-            let room = await roomRepo.findOne({
-                where: { id: roomId },
-            });
-
-            if (!room) {
-                room = roomRepo.create({ id: roomId });
-                await roomRepo.save(room);
-            }
-
-            const newFile = fileRepo.create({
-                id: meta.fileId,
-                fileName: meta.fileName,
-                size: meta.size,
-                mimeType: meta.mimeType,
-                owner: meta.owner,
-                room: room,
-            });
-
-            await fileRepo.save(newFile);
-
-            socket.to(roomId).emit("file-meta", meta);
         });
 
         /* ===== WebRTC Signaling ===== */

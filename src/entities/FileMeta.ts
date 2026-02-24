@@ -13,6 +13,9 @@ export class FileMeta {
     id!: string;
 
     @Column()
+    roomId!: string;
+
+    @Column()
     fileName!: string;
 
     @Column("bigint")

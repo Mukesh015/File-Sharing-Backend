@@ -41,4 +41,35 @@ export class FileService {
 
         return this.fileRepo.remove(file);
     }
+
+    async getFiles(roomId: string, page = 1, limit = 10) {
+        const skip = (page - 1) * limit;
+
+        const [files, total] = await this.fileRepo.findAndCount({
+            where: {
+                room: { id: roomId }, // using relation (better)
+            },
+            order: { createdAt: "DESC" },
+            skip,
+            take: limit,
+            relations: ["room"], // optional (remove if not needed)
+        });
+
+        return {
+            roomId,
+            page,
+            limit,
+            total,
+            hasNext: skip + files.length < total,
+            hasPrev: page > 1,
+            files: files.map((f) => ({
+                id: f.id,
+                fileName: f.fileName,
+                size: Number(f.size),
+                mimeType: f.mimeType,
+                owner: f.owner,
+                createdAt: f.createdAt,
+            })),
+        };
+    }
 }
