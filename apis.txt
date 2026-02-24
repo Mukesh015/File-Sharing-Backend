@@ -1,0 +1,21 @@
+1. POST /api/rooms
+{
+  "roomId": "room123"
+}
+
+
+
+5.POST /api/files
+{
+  "id": "file123",
+  "fileName": "video.mp4",
+  "size": 5000000,
+  "mimeType": "video/mp4",
+  "owner": "socket123",
+  "roomId": "room123"
+}
+
+2. GET /api/rooms
+3. GET /api/rooms/:roomId
+6.DELETE /api/files/:fileId
+4. DELETE /api/rooms/:roomId
