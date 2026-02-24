@@ -10,25 +10,25 @@ import { Room } from "./Room";
 @Entity()
 export class FileMeta {
     @PrimaryColumn()
-    id: string;
+    id!: string;
 
     @Column()
-    fileName: string;
+    fileName!: string;
 
     @Column("bigint")
-    size: number;
+    size!: number;
 
     @Column()
-    mimeType: string;
+    mimeType!: string;
 
     @Column()
-    owner: string;
+    owner!: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @ManyToOne(() => Room, (room) => room.files, {
         onDelete: "CASCADE",
     })
-    room: Room;
+    room!: Room;
 }

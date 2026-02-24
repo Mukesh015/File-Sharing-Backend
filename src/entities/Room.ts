@@ -9,14 +9,15 @@ import { FileMeta } from "./FileMeta";
 
 @Entity()
 export class Room {
+
     @PrimaryColumn()
-    id: string;
+    id!: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @OneToMany(() => FileMeta, (file) => file.room, {
         cascade: true,
     })
-    files: FileMeta[];
+    files!: FileMeta[];
 }
