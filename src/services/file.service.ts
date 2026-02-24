@@ -1,13 +1,13 @@
 import { AppDataSource } from "../config/data-source";
 import { FileMeta } from "../entities/FileMeta";
 import { Room } from "../entities/Room";
+import generateUid from "../utils/generateUid";
 
 export class FileService {
     private fileRepo = AppDataSource.getRepository(FileMeta);
     private roomRepo = AppDataSource.getRepository(Room);
 
     async createFile(data: {
-        id: string;
         fileName: string;
         size: number;
         mimeType: string;
@@ -21,7 +21,7 @@ export class FileService {
         if (!room) throw new Error("Room not found");
 
         const file = this.fileRepo.create({
-            id: data.id,
+            id: generateUid(10),
             fileName: data.fileName,
             size: data.size,
             mimeType: data.mimeType,

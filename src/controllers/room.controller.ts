@@ -6,8 +6,7 @@ const roomService = new RoomService();
 export class RoomController {
     async create(req: Request, res: Response) {
         try {
-            const { roomId } = req.body;
-            const room = await roomService.createRoom(roomId);
+            const room = await roomService.createRoom();
             res.status(201).json(room);
         } catch (error: any) {
             res.status(400).json({ message: error.message });

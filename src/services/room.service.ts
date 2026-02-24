@@ -1,18 +1,12 @@
 import { AppDataSource } from "../config/data-source";
 import { Room } from "../entities/Room";
+import generateRoomId from "../utils/generateRoomId";
 
 export class RoomService {
     private roomRepo = AppDataSource.getRepository(Room);
 
-    async createRoom(roomId: string) {
-        const existing = await this.roomRepo.findOne({
-            where: { id: roomId },
-        });
-
-        if (existing) {
-            throw new Error("Room already exists");
-        }
-
+    async createRoom() {
+        const roomId = generateRoomId(6);
         const room = this.roomRepo.create({ id: roomId });
         return this.roomRepo.save(room);
     }
