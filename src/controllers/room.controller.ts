@@ -16,7 +16,7 @@ export class RoomController {
     async get(req: Request, res: Response) {
         try {
             const room = await roomService.getRoom(req.params.roomId);
-            if (!room) return res.status(404).json({ message: "Not found" });
+            if (!room) return res.status(200).json({ message: "Room does not exist" });
             res.json(room);
         } catch (error) {
             res.status(500).json({ message: "Server error" });
