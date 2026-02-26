@@ -127,10 +127,17 @@ export const setupSocket = (io: Server) => {
                 u => u.userName.trim().toLowerCase() === normalized
             );
 
-            // ⭐ replace old socket if same name
             if (existingIndex !== -1) {
                 const existingUser = roomUsers[existingIndex];
-                console.log("♻️ Replacing existing user:", existingUser);
+
+                const oldSocket = io.sockets.sockets.get(existingUser.socketId);
+
+                if (oldSocket) {
+                    socket.emit("name-taken");
+                    return;
+                }
+
+                console.log("♻️ Removing stale user:", existingUser);
                 roomUsers.splice(existingIndex, 1);
             }
 
