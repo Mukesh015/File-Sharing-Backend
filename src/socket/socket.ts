@@ -165,7 +165,28 @@ export const setupSocket = (io: Server) => {
             targetSocket.disconnect(true);
         });
 
-        /* ===== Disconnect ===== */
+        socket.on("delete-room", async ({ roomId }) => {
+            console.log("🔥 Deleting room:", roomId);
+
+            // 1️⃣ Notify all users
+            io.to(roomId).emit("room-deleted");
+
+            // 2️⃣ Disconnect all sockets in room
+            const clients = await io.in(roomId).fetchSockets();
+
+            for (const client of clients) {
+                client.leave(roomId);
+            }
+
+            // 3️⃣ Remove from memory
+            delete rooms[roomId];
+
+            // 4️⃣ Delete from DB
+            const roomRepo = AppDataSource.getRepository(Room);
+            await roomRepo.delete({ id: roomId });
+
+            console.log("Room deleted successfully");
+        });
 
         socket.on("disconnect", () => {
             console.log("Disconnected:", socket.id);
