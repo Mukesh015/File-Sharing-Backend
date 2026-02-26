@@ -74,28 +74,81 @@ export const setupSocket = (io: Server) => {
     io.on("connection", (socket: Socket) => {
         /* ===== Join Room ===== */
 
+        // socket.on("join-room", async ({ roomId, userName }: JoinRoomPayload) => {
+        //     socket.join(roomId);
+
+        //     if (!rooms[roomId]) {
+        //         rooms[roomId] = [];
+        //     }
+
+        //     const user: User = {
+        //         socketId: socket.id,
+        //         userName,
+        //     };
+
+        //     rooms[roomId].push(user);
+
+        //     const existingUsers = rooms[roomId].filter(
+        //         (u) => u.socketId !== socket.id
+        //     );
+
+        //     socket.emit("existing-users", existingUsers);
+        //     socket.to(roomId).emit("user-joined", user);
+
+        //     /* 🔥 Send existing files from DB */
+
+        //     const roomRepo = AppDataSource.getRepository(Room);
+
+        //     const dbRoom = await roomRepo.findOne({
+        //         where: { id: roomId },
+        //         relations: ["files"],
+        //     });
+
+        //     if (dbRoom?.files) {
+        //         socket.emit("existing-files", dbRoom.files);
+        //     }
+
+        //     console.log(`Room ${roomId} users:`, rooms[roomId].length);
+        // });
+
         socket.on("join-room", async ({ roomId, userName }: JoinRoomPayload) => {
-            socket.join(roomId);
+
+            console.log("JOIN REQUEST", roomId, userName);
 
             if (!rooms[roomId]) {
                 rooms[roomId] = [];
             }
+
+            const roomUsers = rooms[roomId];
+
+            const normalized = userName.trim().toLowerCase();
+
+            const existingIndex = roomUsers.findIndex(
+                u => u.userName.trim().toLowerCase() === normalized
+            );
+
+            // ⭐ replace old socket if same name
+            if (existingIndex !== -1) {
+                const existingUser = roomUsers[existingIndex];
+                console.log("♻️ Replacing existing user:", existingUser);
+                roomUsers.splice(existingIndex, 1);
+            }
+
+            socket.join(roomId);
 
             const user: User = {
                 socketId: socket.id,
                 userName,
             };
 
-            rooms[roomId].push(user);
+            roomUsers.push(user);
 
-            const existingUsers = rooms[roomId].filter(
-                (u) => u.socketId !== socket.id
+            const existingUsers = roomUsers.filter(
+                u => u.socketId !== socket.id
             );
 
             socket.emit("existing-users", existingUsers);
             socket.to(roomId).emit("user-joined", user);
-
-            /* 🔥 Send existing files from DB */
 
             const roomRepo = AppDataSource.getRepository(Room);
 
@@ -108,9 +161,8 @@ export const setupSocket = (io: Server) => {
                 socket.emit("existing-files", dbRoom.files);
             }
 
-            console.log(`Room ${roomId} users:`, rooms[roomId].length);
+            console.log(`Room ${roomId} users:`, roomUsers.length);
         });
-
         /* ===== WebRTC Signaling ===== */
 
         socket.on("offer", ({ target, offer }: OfferPayload) => {
