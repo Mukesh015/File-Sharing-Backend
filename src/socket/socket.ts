@@ -72,44 +72,6 @@ export const getIO = (): Server => {
 
 export const setupSocket = (io: Server) => {
     io.on("connection", (socket: Socket) => {
-        /* ===== Join Room ===== */
-
-        // socket.on("join-room", async ({ roomId, userName }: JoinRoomPayload) => {
-        //     socket.join(roomId);
-
-        //     if (!rooms[roomId]) {
-        //         rooms[roomId] = [];
-        //     }
-
-        //     const user: User = {
-        //         socketId: socket.id,
-        //         userName,
-        //     };
-
-        //     rooms[roomId].push(user);
-
-        //     const existingUsers = rooms[roomId].filter(
-        //         (u) => u.socketId !== socket.id
-        //     );
-
-        //     socket.emit("existing-users", existingUsers);
-        //     socket.to(roomId).emit("user-joined", user);
-
-        //     /* 🔥 Send existing files from DB */
-
-        //     const roomRepo = AppDataSource.getRepository(Room);
-
-        //     const dbRoom = await roomRepo.findOne({
-        //         where: { id: roomId },
-        //         relations: ["files"],
-        //     });
-
-        //     if (dbRoom?.files) {
-        //         socket.emit("existing-files", dbRoom.files);
-        //     }
-
-        //     console.log(`Room ${roomId} users:`, rooms[roomId].length);
-        // });
 
         socket.on("join-room", async ({ roomId, userName }: JoinRoomPayload) => {
 
@@ -186,15 +148,12 @@ export const setupSocket = (io: Server) => {
             });
         });
 
-        socket.on(
-            "ice-candidate",
-            ({ target, candidate }: IceCandidatePayload) => {
-                io.to(target).emit("ice-candidate", {
-                    sender: socket.id,
-                    candidate,
-                });
-            }
-        );
+        socket.on("ice-candidate", ({ target, candidate }: IceCandidatePayload) => {
+            io.to(target).emit("ice-candidate", {
+                sender: socket.id,
+                candidate,
+            });
+        });
 
         /* ===== Kick User ===== */
 

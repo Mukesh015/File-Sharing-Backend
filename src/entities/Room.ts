@@ -6,6 +6,7 @@ import {
     CreateDateColumn,
 } from "typeorm";
 import { FileMeta } from "./FileMeta";
+import { Chat } from "./chat";
 
 @Entity()
 export class Room {
@@ -20,4 +21,7 @@ export class Room {
         cascade: true,
     })
     files!: FileMeta[];
+
+    @OneToMany(() => Chat, chat => chat.room)
+    chats!: Chat[];
 }

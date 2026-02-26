@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import { Room } from "../entities/Room";
 import { FileMeta } from "../entities/FileMeta";
 import dotenv from "dotenv";
+import { Chat } from "../entities/chat";
 
 dotenv.config();
 
@@ -13,6 +14,6 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [Room, FileMeta],
+    entities: [Room, FileMeta, Chat],
     synchronize: true, // dev only
 });
