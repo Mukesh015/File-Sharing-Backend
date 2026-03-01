@@ -10,11 +10,10 @@ export class ChatController {
 
     async create(req: Request, res: Response) {
         try {
-            const { roomId, sender, message } = req.body;
+            const { roomId, sender, message, replyToId, mentions } = req.body;
 
-            const chat = await service.save(roomId, sender, message);
+            const chat = await service.save(roomId, sender, message, replyToId, mentions);
 
-            // 🔥 Emit to room (REAL-TIME)
             const io = getIO();
             io.to(roomId).emit("new-message", chat);
 

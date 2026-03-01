@@ -13,8 +13,13 @@ export class ChatService {
     /**
      * Save message with backend-generated UUID
      */
-    async save(roomId: string, sender: string, message: string) {
-
+    async save(
+        roomId: string,
+        sender: string,
+        message: string,
+        replyToId?: string,
+        mentions?: string[] | null
+    ) {
         const room = await this.roomRepo.findOne({
             where: { id: roomId }
         });
@@ -23,18 +28,31 @@ export class ChatService {
             throw new Error("Room not found");
         }
 
+        let replyTo: Chat | null = null;
+
+        if (replyToId) {
+            replyTo = await this.chatRepo.findOne({
+                where: { id: replyToId }
+            });
+
+            if (!replyTo) {
+                throw new Error("Reply message not found");
+            }
+        }
+
         const chat = this.chatRepo.create({
             sender,
             message,
             room,
+            replyTo,
+            mentions: mentions ?? [],
         });
 
         const saved = await this.chatRepo.save(chat);
 
-        // Reload with reactions relation (empty initially)
         return this.chatRepo.findOne({
             where: { id: saved.id },
-            relations: ["reactions"],
+            relations: ["reactions", "replyTo"],
         });
     }
 
@@ -46,6 +64,7 @@ export class ChatService {
         const messages = await this.chatRepo
             .createQueryBuilder("chat")
             .leftJoinAndSelect("chat.reactions", "reaction")
+            .leftJoinAndSelect("chat.replyTo", "replyTo")
             .where("chat.roomId = :roomId", { roomId })
             .orderBy("chat.createdAt", "ASC")
             .addOrderBy("reaction.createdAt", "ASC")
@@ -56,6 +75,20 @@ export class ChatService {
             sender: msg.sender,
             message: msg.message,
             createdAt: msg.createdAt,
+
+            // 🔥 Reply (minimal safe data only)
+            replyTo: msg.replyTo
+                ? {
+                    id: msg.replyTo.id,
+                    sender: msg.replyTo.sender,
+                    message: msg.replyTo.message,
+                }
+                : null,
+
+            // 🔥 Mentions
+            mentions: msg.mentions ?? [],
+
+            // 🔥 Reactions
             reactions: msg.reactions?.map(r => ({
                 id: r.id,
                 reactionKey: r.reactionKey,
