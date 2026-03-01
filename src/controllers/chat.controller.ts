@@ -2,6 +2,7 @@
 
 import { Request, Response } from "express";
 import { ChatService } from "../services/chat.service";
+import { getIO } from "../socket/socket"; // 🔥 import this
 
 const service = new ChatService();
 
@@ -12,6 +13,10 @@ export class ChatController {
             const { roomId, sender, message } = req.body;
 
             const chat = await service.save(roomId, sender, message);
+
+            // 🔥 Emit to room (REAL-TIME)
+            const io = getIO();
+            io.to(roomId).emit("new-message", chat);
 
             res.status(201).json(chat);
 

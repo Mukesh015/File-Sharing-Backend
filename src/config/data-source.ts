@@ -4,6 +4,7 @@ import { Room } from "../entities/Room";
 import { FileMeta } from "../entities/FileMeta";
 import dotenv from "dotenv";
 import { Chat } from "../entities/chat";
+import { Reaction } from "../entities/Reaction";
 
 dotenv.config();
 
@@ -14,6 +15,6 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [Room, FileMeta, Chat],
+    entities: [Room, FileMeta, Chat, Reaction],
     synchronize: true, // dev only
 });

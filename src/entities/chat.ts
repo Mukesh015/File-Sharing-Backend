@@ -5,9 +5,11 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    CreateDateColumn
+    CreateDateColumn,
+    OneToMany
 } from "typeorm";
 import { Room } from "./Room";
+import { Reaction } from "./Reaction";
 
 @Entity()
 export class Chat {
@@ -20,6 +22,9 @@ export class Chat {
 
     @Column("text")
     message!: string;
+
+    @OneToMany(() => Reaction, reaction => reaction.chat)
+    reactions!: Reaction[];
 
     @ManyToOne(() => Room, room => room.chats, {
         onDelete: "CASCADE"
